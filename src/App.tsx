@@ -1,9 +1,18 @@
 import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { Icon } from "./components/Icon";
+import { PinterestIcon } from "./components/PinterestIcon";
 import { SettingsModal } from "./components/SettingsModal";
 import { Spinner, type SpinnerHandle } from "./components/Spinner";
 import { useWordSource } from "./hooks/useWordSource";
+
+function buildPinterestUrl(word: string) {
+  const trimmed = word
+    .replace(/\s*\([^)]*\)\s*$/, "")
+    .trim()
+    .toLowerCase();
+  return `https://de.pinterest.com/search/pins/?q=${encodeURIComponent(trimmed)}`;
+}
 
 const Page = styled.div`
   min-height: 100%;
@@ -18,11 +27,17 @@ const Header = styled.header`
   padding: 1.25rem 1.5rem;
 `;
 
-const Title = styled.h1`
+const HeaderTitle = styled.h1`
   margin: 0;
-  font-size: 1.25rem;
+  font-size: 1rem;
+  font-weight: 600;
   letter-spacing: 0.02em;
   color: ${({ theme }) => theme.colors.text};
+  opacity: 0.75;
+`;
+
+const MainTitle = styled.h1`
+  font-weight: 300;
 `;
 
 const SettingsButton = styled.button`
@@ -93,13 +108,53 @@ const SpinButton = styled.button`
   }
 `;
 
+const ButtonRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+`;
+
+const PinterestButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  padding: 0;
+  border-radius: 12px;
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  background: transparent;
+  color: ${({ theme }) => theme.colors.text};
+  cursor: pointer;
+  transition:
+    filter 0.15s ease,
+    opacity 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+
+  &:hover:not(:disabled) {
+    border-color: ${({ theme }) => theme.colors.accent};
+    color: ${({ theme }) => theme.colors.accent};
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
 function App() {
   const { items, status, error, config, updateConfig, resetToDefault } =
     useWordSource();
   const spinnerRef = useRef<SpinnerHandle>(null);
   const [spinning, setSpinning] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [currentWord, setCurrentWord] = useState<string | null>(null);
   const hasAutoSpun = useRef(false);
+
+  useEffect(() => {
+    setCurrentWord(items.length ? items[0] : null);
+  }, [items]);
 
   useEffect(() => {
     if (status === "ready" && items.length >= 2 && !hasAutoSpun.current) {
@@ -111,10 +166,15 @@ function App() {
 
   const handleSpin = () => spinnerRef.current?.spin();
 
+  const handlePinterest = () => {
+    if (!currentWord) return;
+    window.open(buildPinterestUrl(currentWord), "_blank", "noopener,noreferrer");
+  };
+
   return (
     <Page>
       <Header>
-        <Title>Decision Wheel</Title>
+        <HeaderTitle>Drawing Decision Wheel</HeaderTitle>
         <SettingsButton type="button" onClick={() => setSettingsOpen(true)}>
           <Icon name="settings-2-outline" size={18} />
           Word list
@@ -122,6 +182,7 @@ function App() {
       </Header>
 
       <Main>
+        <MainTitle>No idea what to draw? Here you go!</MainTitle>
         {error && <ErrorBanner>{error}</ErrorBanner>}
         {status === "loading" && items.length === 0 ? (
           <StatusText>Loading word list…</StatusText>
@@ -130,17 +191,31 @@ function App() {
             ref={spinnerRef}
             items={items}
             onSpinStart={() => setSpinning(true)}
-            onSpinEnd={() => setSpinning(false)}
+            onSpinEnd={(word) => {
+              setSpinning(false);
+              setCurrentWord(word);
+            }}
           />
         )}
-        <SpinButton
-          type="button"
-          onClick={handleSpin}
-          disabled={spinning || items.length < 2}
-        >
-          <Icon name="refresh-outline" size={20} />
-          {spinning ? "Spinning…" : "Spin"}
-        </SpinButton>
+        <ButtonRow>
+          <SpinButton
+            type="button"
+            onClick={handleSpin}
+            disabled={spinning || items.length < 2}
+          >
+            <Icon name="refresh-outline" size={20} />
+            {spinning ? "Spinning…" : "Spin"}
+          </SpinButton>
+          <PinterestButton
+            type="button"
+            onClick={handlePinterest}
+            disabled={spinning || !currentWord}
+            aria-label="Search this word on Pinterest"
+            title="Search this word on Pinterest"
+          >
+            <PinterestIcon size={20} />
+          </PinterestButton>
+        </ButtonRow>
       </Main>
 
       <SettingsModal
