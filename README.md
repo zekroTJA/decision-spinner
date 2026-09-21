@@ -1,35 +1,38 @@
-# React + TypeScript + Vite
+# Decision Wheel
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A single-page React app that displays a slot-machine-style spinner over a list of words/items and lands on one at random. Useful for making quick decisions when you can't pick between a set of options.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Slot-machine-style spin animation that lands on a random item
+- Three item source modes:
+  - **Default** — the bundled default word list
+  - **URL** — fetch a plain-text list from a user-supplied URL (one item per line)
+  - **Custom** — paste your own list of items
+- Source configuration is saved to `localStorage`, so it persists across sessions
+- Automatically spins once on load
 
-## React Compiler
+## Getting started
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+This project uses [pnpm](https://pnpm.io).
 
-Note: This will impact Vite dev & build performances.
-You can also try [the experimental native React Compiler support in plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md#rust-react-compiler) by using `compiler: true` in the plugin options instead of using the Babel plugin.
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+pnpm install
+pnpm dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## Commands
+
+- `pnpm dev` — start the Vite dev server
+- `pnpm build` — type-check (`tsc -b`) and build for production
+- `pnpm lint` — run oxlint
+- `pnpm preview` — preview a production build locally
+
+There is no test suite configured.
+
+## Tech stack
+
+- [React](https://react.dev) 19 + [TypeScript](https://www.typescriptlang.org)
+- [Vite](https://vite.dev), with the Babel-based [React Compiler](https://react.dev/learn/react-compiler) plugin
+- [styled-components](https://styled-components.com) for styling
+- [eva-icons](https://akveo.github.io/eva-icons/) for icons
